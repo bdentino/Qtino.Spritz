@@ -1,0 +1,4 @@
+module Spritz
+plugin SpritzPlugin
+classname SpritzPlugin
+typeinfo plugins.qmltypes

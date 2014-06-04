@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/Spritz">
+        <file>SpritzView.qml</file>
+    </qresource>
+</RCC>
