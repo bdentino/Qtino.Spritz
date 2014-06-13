@@ -2,3 +2,5 @@ module Spritz
 plugin SpritzPlugin
 classname SpritzPlugin
 typeinfo plugins.qmltypes
+
+SpritzWidget 1.0 SpritzWidget.qml

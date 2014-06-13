@@ -14,7 +14,7 @@ class SpritzRenderThread : public QThread
     Q_OBJECT
 
 public:
-    SpritzRenderThread(const QSize& size, SpritzViewPrivate* data);
+    SpritzRenderThread(SpritzViewPrivate* data);
 
     QOffscreenSurface* surface;
     QOpenGLContext* context;

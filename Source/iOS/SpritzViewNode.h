@@ -39,10 +39,8 @@ private:
 
     QMutex m_mutex;
 
-    QSGTexture *m_texture;
-    QQuickWindow *m_window;
-
-    QImage m_image;
+    QSGTexture* m_texture;
+    QQuickWindow* m_window;
 };
 
 #endif // SPRITZVIEWNODE_H

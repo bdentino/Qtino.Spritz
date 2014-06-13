@@ -30,8 +30,6 @@ SpritzRenderer::~SpritzRenderer()
 
 void SpritzRenderer::initialize()
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
     QOpenGLShader *vshader2 = new QOpenGLShader(QOpenGLShader::Vertex, &program2);
     const char *vsrc2 =
         "attribute vec4 position;           \n"
@@ -47,7 +45,7 @@ void SpritzRenderer::initialize()
 
     QOpenGLShader *fshader2 = new QOpenGLShader(QOpenGLShader::Fragment, &program2);
     const char *fsrc2 =
-        "varying highp vec2 textureXYout;                        \n"
+        "varying highp vec2 textureXYout;                       \n"
         "uniform sampler2D texture;                             \n"
         "void main(void)                                        \n"
         "{                                                      \n"
@@ -74,6 +72,8 @@ void SpritzRenderer::initialize()
     double pctWidth = (double)(view.bounds.size.width) / (double)width;
     double pctHeight = (double)(view.bounds.size.height) / (double)height;
 
+    qDebug() << "pctWidth:" << pctWidth << width;
+    qDebug() << "pctHeight:" << pctHeight << height;
     textureCoords << QVector2D(0.0, 1 - pctHeight)
                   << QVector2D(0.0, 1)
                   << QVector2D(pctWidth, 1 - pctHeight)

@@ -1,6 +1,7 @@
 import QtQuick 2.2
 import QtQuick.Window 2.1
 import Spritz 1.0
+import "SpritzKeys.js" as SpritzKeys
 
 Window {
     id: window
@@ -27,33 +28,23 @@ Window {
         color: 'red'
         opacity: 0.5
     }
+
     SpritzView {
         id: spritzView
-        x: 15
-        y: 10
-        height: 100
-        width: parent.width - 30
 
-        SpritzSDK.clientId: "b5de14640f2092af4"
-        SpritzSDK.clientSecret: "9feb2738-46bd-4689-af40-330d827eb556"
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 30
 
-        Component.onCompleted: { spritzText(window.spritzText); mover.start() }
+        width: parent.width * 0.9
+        height: width * 0.35
 
-        MouseArea {
-            property int lastX
-            property int lastY
-            anchors.fill: parent
-            onPressed: { console.log("Pressed!"); lastX = mouse.x; lastY = mouse.y }
-            onPositionChanged: {
-                console.log("Moved!");
-                spritzView.x += (mouse.x - lastX);
-                spritzView.y += (mouse.y - lastY);
-                lastX = mouse.x;
-                lastY = mouse.y;
-            }
-        }
+        SpritzSDK.clientId: SpritzKeys.clientId
+        SpritzSDK.clientSecret: SpritzKeys.clientSecret
 
-        NumberAnimation { id: mover; target: spritzView; properties: 'y'; from: 15; to: 500; duration: 2000 }
+        onInitialized: { console.log(height, width); spritzText(window.spritzText); mover.start() }
+
+        Rectangle { anchors.fill: parent; color: 'blue'; opacity: 0.3 }
     }
     Rectangle {
         anchors.right: parent.right

@@ -1,3 +1,5 @@
+#include <UIKit/UIKit.h>
+#include <SPBaseView.h>
 #include "SpritzRenderThread.h"
 #include "SpritzRenderer.h"
 #include "SpritzViewPrivate.h"
@@ -5,19 +7,26 @@
 #include <QOpenGLShaderProgram>
 #include <QSGSimpleTextureNode>
 
-SpritzRenderThread::SpritzRenderThread(const QSize& size, SpritzViewPrivate* data)
+SpritzRenderThread::SpritzRenderThread(SpritzViewPrivate* data)
     : surface(0),
       context(0),
       m_renderFbo(0),
       m_displayFbo(0),
       m_spritzRenderer(0),
-      m_size(size),
+      m_size(QSize(0,0)),
       m_data(data)
 {
+
 }
 
 void SpritzRenderThread::renderNext()
 {
+    if (m_size.height() == 0 && m_size.width() == 0)
+    {
+        m_size = QSize(m_data->view.bounds.size.width,
+                       m_data->view.bounds.size.height);
+    }
+
     context->makeCurrent(surface);
 
     if (!m_renderFbo)

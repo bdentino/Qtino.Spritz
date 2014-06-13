@@ -27,7 +27,7 @@ ios {
     OBJECTIVE_SOURCES -= $$PWD/iOS/SpritzViewPrivate.mm
 
     RESOURCES += \
-        iOS/images.qrc
+        $$PWD/iOS/Spritz.qrc
 
     OTHER_FILES += \
         $$PWD/iOS/qmldir
@@ -42,13 +42,19 @@ ios {
     LIBS += -framework SpritzSDK -framework AudioToolbox -framework CoreData -framework UIKit
     INCLUDEPATH += /Users/bdentino/SpritzSDK-1.0/SpritzSDK.framework/Headers/
 
+    qmls.files += $$PWD/SpritzWidget.qml
     spritzBundle.files += /Users/bdentino/SpritzSDK-1.0/SpritzSDK.bundle
     QMAKE_BUNDLE_DATA += spritzBundle
+
+    spritzImages.files += $$PWD/iOS/poweredbyspritz.png
 
     installPath = $$[QT_INSTALL_QML]/$$replace(uri, \\., /)
     qmldir.path = $$installPath
     target.path = $$installPath
-    INSTALLS += target qmldir
+    qmls.path += $$installPath
+    spritzImages.path = $$installPath
+
+    INSTALLS += target qmldir spritzImages qmls
 }
 
 macx {

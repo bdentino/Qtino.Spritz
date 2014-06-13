@@ -15,17 +15,27 @@
 QList<QThread*> SpritzView::s_threads;
 
 SpritzView::SpritzView()
-    : m_renderThread(0),
-      m_data(0)
+    : m_error(""),
+      m_renderThread(NULL),
+      m_data(NULL),
+      m_node(NULL)
 {
-    Q_INIT_RESOURCE(images);
     setFlag(ItemHasContents, true);
 
     m_data = new SpritzViewPrivate;
-    initSpritzComponent();
+    m_data->delegate = [[SpritzDelegate alloc] initWithSpritzView: this];
+    m_data->view = NULL;
 
-    m_renderThread = new SpritzRenderThread(QSize(512, 512), m_data);
+    m_renderThread = new SpritzRenderThread(m_data);
     SpritzView::s_threads << m_renderThread;
+
+    connect(this, SIGNAL(readingStateChanged()), this, SLOT(resetRenderer()));
+    connect(this, SIGNAL(positionChanged()), this, SLOT(resetRenderer()));
+
+    connect(this, SIGNAL(textColorChanged()), m_renderThread, SLOT(renderNext()), Qt::QueuedConnection);
+    connect(this, SIGNAL(focusColorChanged()), m_renderThread, SLOT(renderNext()), Qt::QueuedConnection);
+    connect(this, SIGNAL(initialized()), m_renderThread, SLOT(renderNext()), Qt::QueuedConnection);
+
 }
 
 SpritzView::~SpritzView()
@@ -67,6 +77,11 @@ bool SpritzView::started()
 bool SpritzView::paused()
 {
     return m_data->view.paused;
+}
+
+QString SpritzView::error()
+{
+    return m_error;
 }
 
 QColor SpritzView::textColor()
@@ -165,38 +180,21 @@ void SpritzView::goForwardWords(int numWords)
     [m_data->view seek:numWords absolute:NO];
 }
 
-void SpritzView::onHeightChanged()
+void SpritzView::componentComplete()
 {
-
-}
-
-void SpritzView::onWidthChanged()
-{
-
-}
-
-void SpritzView::onXChanged()
-{
-
-}
-
-void SpritzView::onYChanged()
-{
-
-}
-
-void SpritzView::onCompleted()
-{
-
+    QQuickItem::componentComplete();
+    if (width() != 0 && height() != 0)
+    {
+        initSpritzComponent();
+    }
 }
 
 void SpritzView::initSpritzComponent()
 {
-    m_data->delegate = [[SpritzDelegate alloc] initWithSpritzView: this];
-    m_data->view = NULL;
-
-    //TODO: Make this dependent on the actual size
-    m_data->view = [[SPBaseView alloc] initWithFrame: CGRectMake(0, 0, 600, 200)];
+    float width = boundingRect().width();
+    float height = boundingRect().height();
+    float scale = [[UIScreen mainScreen] scale];
+    m_data->view = [[SPBaseView alloc] initWithFrame: CGRectMake(0, 0, width * scale, height * scale)];
     [m_data->view setDelegate:id(m_data->delegate)];
 
     UIView* textView = [m_data->view.subviews objectAtIndex:0];
@@ -205,17 +203,21 @@ void SpritzView::initSpritzComponent()
     [[textView layer] setMasksToBounds: true];
 
     [[m_data->view.subviews objectAtIndex: 1] setHidden: true];
+    emit initialized();
 }
 
 void SpritzView::readyToRender()
 {
+    if (!m_data->view)
+        initSpritzComponent();
     m_renderThread->surface = new QOffscreenSurface();
     m_renderThread->surface->setFormat(m_renderThread->context->format());
     m_renderThread->surface->create();
 
     m_renderThread->moveToThread(m_renderThread);
 
-    connect(window(), SIGNAL(sceneGraphInvalidated()), m_renderThread, SLOT(shutdown()), Qt::QueuedConnection);
+    connect(window(), SIGNAL(sceneGraphInvalidated()), m_renderThread,
+            SLOT(shutdown()), Qt::QueuedConnection);
 
     m_renderThread->start();
     update();
@@ -223,14 +225,13 @@ void SpritzView::readyToRender()
 
 QSGNode* SpritzView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData)
 {
-    qDebug() << "Updating Paint Node";
     Q_UNUSED(updatePaintNodeData);
-    SpritzViewNode *node = static_cast<SpritzViewNode*>(oldNode);
+    m_node = static_cast<SpritzViewNode*>(oldNode);
 
-    if (!m_renderThread->context) {
+    if (!m_renderThread->context)
+    {
         QOpenGLContext* current = window()->openglContext();
         current->doneCurrent();
-
         m_renderThread->context = new QOpenGLContext();
         m_renderThread->context->setFormat(current->format());
         m_renderThread->context->setShareContext(current);
@@ -243,18 +244,39 @@ QSGNode* SpritzView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* upda
         return 0;
     }
 
-    if (!node) {
-        node = new SpritzViewNode(window());
+    if (!m_node) {
+        m_node = new SpritzViewNode(window());
 
-        connect(m_renderThread, SIGNAL(textureReady(int,QSize)), node, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
-        connect(node, SIGNAL(pendingNewTexture()), window(), SLOT(update()), Qt::QueuedConnection);
-        connect(window(), SIGNAL(beforeRendering()), node, SLOT(prepareNode()), Qt::DirectConnection);
-        connect(node, SIGNAL(textureInUse()), m_renderThread, SLOT(renderNext()), Qt::QueuedConnection);
+        connect(m_renderThread, SIGNAL(textureReady(int,QSize)),
+                m_node, SLOT(newTexture(int,QSize)), Qt::DirectConnection);
+        resetRenderer();
+    }
+    m_node->setRect(boundingRect());
+
+    return m_node;
+}
+
+void SpritzView::resetRenderer()
+{
+    if (!m_node) return;
+    if (loading() || (started() && !paused()))
+    {
+        connect(m_node, SIGNAL(pendingNewTexture()), window(), SLOT(update()), Qt::QueuedConnection);
+        connect(window(), SIGNAL(beforeRendering()), m_node, SLOT(prepareNode()), Qt::DirectConnection);
+        connect(m_node, SIGNAL(textureInUse()), m_renderThread, SLOT(renderNext()), Qt::QueuedConnection);
 
         QMetaObject::invokeMethod(m_renderThread, "renderNext", Qt::QueuedConnection);
     }
+    else
+    {
+        disconnect(m_node, SIGNAL(pendingNewTexture()), window(), SLOT(update()));
+        disconnect(window(), SIGNAL(beforeRendering()), m_node, SLOT(prepareNode()));
+        disconnect(m_node, SIGNAL(textureInUse()), m_renderThread, SLOT(renderNext()));
+    }
+}
 
-    node->setRect(boundingRect());
-
-    return node;
+void SpritzView::setError(QString error)
+{
+    m_error = error;
+    emit errorChanged();
 }

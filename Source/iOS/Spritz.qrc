@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>poweredbyspritz.png</file>
+        <file>poweredbyspritz@2x~iphone.png</file>
+        <file>poweredbyspritz~iphone.png</file>
+        <file>../SpritzWidget.qml</file>
+    </qresource>
+</RCC>

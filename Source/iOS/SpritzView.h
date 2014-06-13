@@ -1,5 +1,3 @@
-// Modeled after ThreadRenderer class in 'TextureInThread' example
-
 #ifndef SPRITZVIEW_H
 #define SPRITZVIEW_H
 
@@ -8,20 +6,25 @@
 
 struct SpritzViewPrivate;
 class SpritzRenderThread;
+class SpritzViewNode;
 class SpritzView : public QQuickItem
 {
+    friend class SpritzDelegateHelper;
+
     Q_OBJECT
 
     //TODO: Should i allow setting API keys through this class? (SpritzSDK attached property)
 
     Q_PROPERTY(int wordsPerMinute READ wordsPerMinute WRITE setWordsPerMinute NOTIFY wordsPerMinuteChanged)
-    Q_PROPERTY(int currentWordIndex READ currentWordIndex WRITE jumpToWord NOTIFY currentWordIndexChanged)
+    Q_PROPERTY(int currentWordIndex READ currentWordIndex WRITE jumpToWord NOTIFY positionChanged)
     Q_PROPERTY(int characterIndex READ characterIndex)
-    Q_PROPERTY(int timeIndexMs READ timeIndexMs NOTIFY timeIndexMsChanged)
+    Q_PROPERTY(int timeIndexMs READ timeIndexMs NOTIFY positionChanged)
 
-    Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
-    Q_PROPERTY(bool started READ started NOTIFY startedChanged)
-    Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
+    Q_PROPERTY(bool loading READ loading NOTIFY readingStateChanged)
+    Q_PROPERTY(bool started READ started NOTIFY readingStateChanged)
+    Q_PROPERTY(bool paused READ paused NOTIFY readingStateChanged)
+
+    Q_PROPERTY(QString error READ error NOTIFY errorChanged)
 
     //TODO: Implement color changing
     Q_PROPERTY(QColor textColor READ textColor WRITE setTextColor NOTIFY textColorChanged)
@@ -48,14 +51,15 @@ public:
     void setTextColor(QColor color);
     void setFocusColor(QColor color);
 
-signals:
-    void wordsPerMinuteChanged();
-    void currentWordIndexChanged();
-    void timeIndexMsChanged();
+    QString error();
 
-    void loadingChanged();
-    void startedChanged();
-    void pausedChanged();
+signals:
+    void initialized();
+    void wordsPerMinuteChanged();
+    void errorChanged();
+
+    void readingStateChanged();
+    void positionChanged();
 
     void textColorChanged();
     void focusColorChanged();
@@ -68,7 +72,6 @@ signals:
     void movedBackSentence(int numSentences, int charIndex, int wordIndex, int timeIndexMs, int wpm);
     void movedForwardSentence(int numSentences, int charIndex, int wordIndex, int timeIndexMs, int wpm);
     void finished(int charIndex, int wordIndex, int timeIndexMs, int wpm);
-    void receivedError(QString error);
 
 public slots:
     void spritzText(QString content);
@@ -88,17 +91,13 @@ public slots:
     void jumpToWord(int index);
 
 protected slots:
-    void onHeightChanged();
-    void onWidthChanged();
-
-    void onXChanged();
-    void onYChanged();
-
-    void onCompleted();
+    void componentComplete();
     void readyToRender();
+    void resetRenderer();
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData);
+    void setError(QString error);
 
 private:
     void initSpritzComponent();
@@ -106,8 +105,11 @@ private:
     QColor m_textColor;
     QColor m_focusColor;
 
+    QString m_error;
+
     SpritzRenderThread* m_renderThread;
     SpritzViewPrivate* m_data;
+    SpritzViewNode* m_node;
 
     static QList<QThread*> s_threads;
 };
