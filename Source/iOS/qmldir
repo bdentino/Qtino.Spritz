@@ -1,4 +1,4 @@
-module Spritz
+module Qtino.Spritz
 plugin SpritzPlugin
 classname SpritzPlugin
 typeinfo plugins.qmltypes

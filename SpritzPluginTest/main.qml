@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Window 2.1
-import Spritz 1.0
+import Qtino.Spritz 1.0
 import "SpritzKeys.js" as SpritzKeys
 
 Window {
@@ -42,16 +42,32 @@ Window {
         SpritzSDK.clientId: SpritzKeys.clientId
         SpritzSDK.clientSecret: SpritzKeys.clientSecret
 
-        onInitialized: { console.log(height, width); spritzText(window.spritzText); mover.start() }
+        onInitialized: { spritzText(window.spritzText); }
 
-        Rectangle { anchors.fill: parent; color: 'blue'; opacity: 0.3 }
+        Rectangle {
+            id: overlayRect;
+            anchors.centerIn: parent;
+            height: parent.height;
+            width: parent.width;
+            color: 'blue';
+            opacity: 0.3
+        }
     }
     Rectangle {
+        id: greenRect
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         height: 150
         width: parent.width / 3
         color: 'green'
         opacity: 1
+        Component.onCompleted: shrinker.start();
+    }
+
+    SequentialAnimation {
+        id: shrinker
+        PropertyAnimation { target: spritzView; property: 'scale'; from: 1; to: 0; duration: 5000 }
+        PropertyAnimation { target: spritzView; property: 'scale'; from: 0; to: 1; duration: 5000 }
+        loops: Animation.Infinite
     }
 }

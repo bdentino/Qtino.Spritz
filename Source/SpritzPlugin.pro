@@ -7,7 +7,7 @@ CONFIG += qt plugin
 QT += core-private gui-private
 
 TARGET = $$qtLibraryTarget($$TARGET)
-uri = Spritz
+uri = Qtino.Spritz
 
 ios { OS = iOS }
 macx { OS = OSX }
