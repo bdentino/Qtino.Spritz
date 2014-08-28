@@ -1,4 +1,4 @@
-QtSpritz
+Qtino.Spritz
 
 This project is intended to provide a platform-agnostic wrapper around the Spritz SDK. Currently, it only supports iOS (a 'dummy' OSX implementation is provided for prototyping purposes). 
 
