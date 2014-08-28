@@ -9,8 +9,28 @@ QT += core-private gui-private
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = Qtino.Spritz
 
+sdk_version = 1.2
+
 ios { OS = iOS }
 macx { OS = OSX }
+
+unix: { libprefix = lib }
+win32: { libprefix = }
+
+CONFIG(static, static|shared) {
+    macx|ios|unix: { libsuffix = a }
+    win32: { libsuffix = lib }
+}
+else {
+    macx: { libsuffix = dylib }
+    unix:!macx: { libsuffix = so }
+    win32: { libsuffix = lib }
+}
+
+cleanTarget.files +=
+cleanTarget.path += $$installPath
+macx|ios|unix: cleanTarget.extra = rm -rf $$installPath/*.qml $$installPath/qmldir $$installPath/plugins.qmltypes $$installPath/$$libprefix$$TARGET$${qtPlatformTargetSuffix}.$$libsuffix
+
 qmldir.files = $$PWD/$${OS}/qmldir
 
 ios {
@@ -36,14 +56,14 @@ ios {
 
     QMAKE_MOC_OPTIONS += -Muri=$$uri
 
-    QMAKE_LFLAGS += -F/Users/bdentino/SpritzSDK-1.0 \
+    QMAKE_LFLAGS += -F/Users/bdentino/SpritzSDK/iOS/$$sdk_version \
                     -F/System/Library/Frameworks
 
     LIBS += -framework SpritzSDK -framework AudioToolbox -framework CoreData -framework UIKit
-    INCLUDEPATH += /Users/bdentino/SpritzSDK-1.0/SpritzSDK.framework/Headers/
+    INCLUDEPATH += /Users/bdentino/SpritzSDK/iOS/$$sdk_version/SpritzSDK.framework/Headers/
 
     qmls.files += $$PWD/SpritzWidget.qml
-    spritzBundle.files += /Users/bdentino/SpritzSDK-1.0/SpritzSDK.bundle
+    spritzBundle.files += /Users/bdentino/SpritzSDK/iOS/$$sdk_version/SpritzSDK.bundle
     QMAKE_BUNDLE_DATA += spritzBundle
 
     spritzImages.files += $$PWD/iOS/poweredbyspritz.png
@@ -54,7 +74,7 @@ ios {
     qmls.path += $$installPath
     spritzImages.path = $$installPath
 
-    INSTALLS += target qmldir spritzImages qmls
+    INSTALLS += cleanTarget target qmldir spritzImages qmls
 }
 
 macx {
@@ -65,7 +85,7 @@ macx {
     target.path = $$installPath
     qmls.path = $$installPath
 
-    INSTALLS += qmldir qmls
+    INSTALLS += cleanTarget qmldir qmls
 
     RESOURCES += \
         $$PWD/OSX/*.qrc
@@ -74,3 +94,5 @@ macx {
         $$PWD/OSX/qmldir \
         $$PWD/OSX/*.qml
 }
+
+QMAKE_POST_LINK = make install

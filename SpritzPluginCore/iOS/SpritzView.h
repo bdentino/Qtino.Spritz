@@ -3,10 +3,11 @@
 
 #include <QQuickItem>
 #include <QtQuick/QQuickFramebufferObject>
+#include <QTimer>
 
 struct SpritzViewPrivate;
-class SpritzRenderThread;
-class SpritzViewNode;
+//class SpritzRenderThread;
+//class SpritzViewNode;
 class SpritzView : public QQuickItem
 {
     friend class SpritzDelegateHelper;
@@ -16,9 +17,11 @@ class SpritzView : public QQuickItem
     //TODO: Should i allow setting API keys through this class? (SpritzSDK attached property)
 
     Q_PROPERTY(int wordsPerMinute READ wordsPerMinute WRITE setWordsPerMinute NOTIFY wordsPerMinuteChanged)
-    Q_PROPERTY(int currentWordIndex READ currentWordIndex WRITE jumpToWord NOTIFY positionChanged)
-    Q_PROPERTY(int characterIndex READ characterIndex)
+    Q_PROPERTY(int currentSegmentIndex READ currentSegmentIndex NOTIFY positionChanged)
+    Q_PROPERTY(int characterIndex READ characterIndex WRITE jumpToCharacter NOTIFY positionChanged)
     Q_PROPERTY(int timeIndexMs READ timeIndexMs NOTIFY positionChanged)
+
+    Q_PROPERTY(double progress READ progress NOTIFY progressChanged)
 
     Q_PROPERTY(bool loading READ loading NOTIFY readingStateChanged)
     Q_PROPERTY(bool started READ started NOTIFY readingStateChanged)
@@ -35,9 +38,11 @@ public:
     ~SpritzView();
 
     int wordsPerMinute();
-    int currentWordIndex();
+    int currentSegmentIndex();
     int characterIndex();
     int timeIndexMs();
+
+    double progress();
 
     bool loading();
     bool started();
@@ -58,6 +63,7 @@ signals:
     void wordsPerMinuteChanged();
     void errorChanged();
 
+    void progressChanged();
     void readingStateChanged();
     void positionChanged();
 
@@ -74,7 +80,9 @@ signals:
     void finished(int charIndex, int wordIndex, int timeIndexMs, int wpm);
 
 public slots:
-    void spritzText(QString content);
+    void load(QString content);
+    void load(QUrl url);
+    void spritzText(QString content, int charIndex = -1);
     void spritzUrl(QUrl url);
     void pause();
     void resume();
@@ -85,33 +93,41 @@ public slots:
 
     void goBackSentences(int numSentences);
     void goForwardSentences(int numSentences);
-    void goBackWords(int numWords);
-    void goForwardWords(int numWords);
+    void goBackSegments(int numSegments);
+    void goForwardSegments(int numSegments);
 
-    void jumpToWord(int index);
+    void jumpToCharacter(int index);
 
 protected slots:
     void componentComplete();
-    void readyToRender();
-    void resetRenderer();
+//    void readyToRender();
+//    void resetRenderer();
+
+    void onGeometryChanged();
+    void onWindowChanged(QQuickWindow* window);
+    void initSpritzComponent();
+    void onParentChange();
 
 protected:
-    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData);
+    virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry);
+//    QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData* updatePaintNodeData);
     void setError(QString error);
 
 private:
-    void initSpritzComponent();
 
     QColor m_textColor;
     QColor m_focusColor;
 
     QString m_error;
 
-    SpritzRenderThread* m_renderThread;
-    SpritzViewPrivate* m_data;
-    SpritzViewNode* m_node;
+    QTimer m_progressNotifier;
 
-    static QList<QThread*> s_threads;
+    SpritzViewPrivate* m_data;
+    //SpritzRenderThread* m_renderThread;
+    //SpritzViewNode* m_node;
+    //static QList<QThread*> s_threads;
+
+    QList<QQuickItem*> m_visualParents;
 };
 
 #endif // SPRITZVIEW_H

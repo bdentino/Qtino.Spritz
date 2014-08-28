@@ -93,52 +93,52 @@ void SpritzRenderer::initialize()
 
 void SpritzRenderer::render()
 {
-    [[m_data->view.subviews objectAtIndex:0] setNeedsDisplay];
+//    [[m_data->view.subviews objectAtIndex:0] setNeedsDisplay];
 
-    glGenTextures(1, &textureId);
-    grabSpritzViewPixels();
+//    glGenTextures(1, &textureId);
+//    grabSpritzViewPixels();
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+//    glEnable(GL_BLEND);
+//    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+//    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+//    glClear(GL_COLOR_BUFFER_BIT);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    program2.bind();
-    program2.enableAttributeArray(vertexAttr2);
-    program2.enableAttributeArray(textureInAttr2);
-    program2.setAttributeArray(vertexAttr2, textureVertices.constData());
-    program2.setAttributeArray(textureInAttr2, textureCoords.constData());
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-    glUniform1i(textureUniform2, 0);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, textureVertices.size());
-    program2.disableAttributeArray(textureInAttr2);
-    program2.disableAttributeArray(vertexAttr2);
-    program2.release();
+//    program2.bind();
+//    program2.enableAttributeArray(vertexAttr2);
+//    program2.enableAttributeArray(textureInAttr2);
+//    program2.setAttributeArray(vertexAttr2, textureVertices.constData());
+//    program2.setAttributeArray(textureInAttr2, textureCoords.constData());
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, textureId);
+//    glUniform1i(textureUniform2, 0);
+//    glDrawArrays(GL_TRIANGLE_STRIP, 0, textureVertices.size());
+//    program2.disableAttributeArray(textureInAttr2);
+//    program2.disableAttributeArray(vertexAttr2);
+//    program2.release();
 
-    glDisable(GL_BLEND);
-    glDeleteTextures(1, &textureId);
+//    glDisable(GL_BLEND);
+//    glDeleteTextures(1, &textureId);
 }
 
 void SpritzRenderer::grabSpritzViewPixels()
 {
-    // draw the view to the buffer
-    CGContextClearRect(m_renderObjects->context, CGRectMake(0, 0, width, height));
-    [m_data->view.layer renderInContext:m_renderObjects->context];
+//    // draw the view to the buffer
+//    CGContextClearRect(m_renderObjects->context, CGRectMake(0, 0, width, height));
+//    [m_data->view.layer renderInContext:m_renderObjects->context];
 
-    glBindTexture(GL_TEXTURE_2D, textureId);
+//    glBindTexture(GL_TEXTURE_2D, textureId);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+//                 GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 quint32 SpritzRenderer::nextHighestPowerOf2(quint32 num)

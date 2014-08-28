@@ -3,13 +3,69 @@ import QtQuick 2.0
 Rectangle {
     id: spritzContainer
 
-    property string content: "blah blah blah"
     property int wordsPerMinute: 250
-    property alias running: sequencer.running
+    property int currentSegmentIndex: 0
+    property int characterIndex: 0
+    property int timeIndexMs: 0
+
+    property bool loading
+    property bool started
+    property bool paused
+
+    property double progress
+
+    property string error
+
+    property color textColor: '#333'
+    property color focusColor: 'red'
+
     property bool collapsible: true
 
+    function load(content) {
+        sequencer.content = content;
+        currentSegmentIndex = 0;
+    }
+
+    function spritzText(content) {
+        sequencer.content = content
+        currentSegmentIndex = 0
+        sequencer.start();
+    }
+
+    function spritzUrl(url) {
+        console.log("Url Spritzing is not supported on this platform");
+    }
+
+    function pause() {
+        sequencer.stop()
+    }
+
+    function resume() {
+        sequencer.start();
+    }
+
     function reset() {
-        sequencer.currentIndex = 0;
+        currentSegmentIndex = 0;
+    }
+
+    function goBackSentences(numSentences) {
+        console.log("Jumping sentences is not supported on this platform");
+    }
+
+    function goForwardSentences(numSentences) {
+        console.log("Jumping sentences is not supported on this platform");
+    }
+
+    function goBackSegments(numWords) {
+        currentSegmentIndex += numWords
+    }
+
+    function goForwardSegments(numWords) {
+        currentSegmentIndex += numWords
+    }
+
+    function jumpToCharacter(characterIndex) {
+        console.log("Jumping to character is not supported on this platform");
     }
 
     state: 'opened'
@@ -110,7 +166,7 @@ Rectangle {
 
     Text {
         id: leftText
-        color: '#333'
+        color: spritzContainer.textColor
         anchors.verticalCenter: centerCharacter.verticalCenter
         anchors.right: centerCharacter.left
         anchors.rightMargin: 3
@@ -122,7 +178,7 @@ Rectangle {
 
     Text {
         id: centerCharacter
-        color: 'red'
+        color: spritzContainer.focusColor
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: crosshair.horizontalCenter
         text: typeof(sequencer.currentWord) === 'undefined' ? '' : sequencer.currentWord.middle
@@ -172,16 +228,17 @@ Rectangle {
     Timer {
         id: sequencer
 
-        property int currentIndex: 0
-        readonly property var spritzedWords: spritzer.spritzify(spritzContainer.content)
+        property int currentIndex: spritzContainer.currentSegmentIndex
+        property string content
+        readonly property var spritzedWords: spritzer.spritzify(content)
         readonly property var currentWord: typeof(spritzedWords) === 'undefined'
                                            ? { "start": "", "middle": "\u2022", "end": "" }
-        : spritzedWords[currentIndex]
+                                           : spritzedWords[currentIndex]
 
         interval: 60000 / spritzContainer.wordsPerMinute
         onTriggered: {
             if (currentIndex === spritzedWords.length - 1) { running = false; return; }
-            currentIndex = (currentIndex + 1) % spritzedWords.length;
+            spritzContainer.currentSegmentIndex = (currentIndex + 1) % spritzedWords.length;
         }
         repeat: true
         running: false
@@ -189,11 +246,11 @@ Rectangle {
         onSpritzedWordsChanged: {
             if (typeof(spritzedWords) === 'undefined') return;
 
-            currentIndex = 0
+            spritzContainer.currentSegmentIndex = 0
             if (typeof(spritzedWords[currentIndex]) === 'undefined') return;
 
             while(spritzedWords[currentIndex].middle.trim() === '')
-                currentIndex++
+                spritzContainer.currentSegmentIndex++
         }
     }
 

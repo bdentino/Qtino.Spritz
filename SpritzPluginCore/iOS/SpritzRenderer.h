@@ -29,7 +29,7 @@ private:
     int textureInAttr2;
     int textureUniform2;
     GLubyte* pixelBuffer;
-    GLuint textureId;
+    //GLuint textureId;
     quint32 height;
     quint32 width;
 

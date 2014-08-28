@@ -9,17 +9,14 @@ RESOURCES += qml.qrc
 OTHER_FILES += main.qml \
     SpritzKeys.js
 
+spritz_sdk_version = 1.2
+
 ios {
-    QMAKE_LFLAGS += -F/Users/bdentino/SpritzSDK-1.0 \
+    QMAKE_LFLAGS += -F/Users/bdentino/SpritzSDK/iOS/$$spritz_sdk_version \
                     -F/System/Library/Frameworks
 
     LIBS += -framework SpritzSDK -framework AudioToolbox -framework CoreData -framework UIKit
 
-    spritzBundle.files += /Users/bdentino/SpritzSDK-1.0/SpritzSDK.bundle
+    spritzBundle.files += /Users/bdentino/SpritzSDK/iOS/$$spritz_sdk_version/SpritzSDK.bundle
     QMAKE_BUNDLE_DATA += spritzBundle
 }
-
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-

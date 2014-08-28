@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Window 2.1
-import Qtino.Spritz 1.0
+import Qtino.Spritz 1.2
 import "SpritzKeys.js" as SpritzKeys
 
 Window {
@@ -10,8 +10,7 @@ Window {
     height: 360
     opacity: 0.3
 
-    property string spritzText: "Hello this is a test of Qt Spritz Rendering. Hopefully it works!! That would be really exciting!"
-
+    property string spritzText: "Money causes teenagers to feel stress. It makes them feel bad about themselves and envy other people. My friend, for instance, lives with her family and has to share a room with her sister, who is very cute and intelligent. This girl wishes she could have her own room and have a lot of stuff, but she can’t have these things because her family doesn’t have much money. Her family’s income is pretty low because her father is old and doesn’t go to work. Her sister is the only one who works. Because her family can’t buy her the things she wants, she feels a lot of stress and gets angry sometimes. Once, she wanted a beautiful dress to wear to a sweetheart dance. She asked her sister for some money to buy the dress. She was disappointed because her sister didn’t have money to give her. She sat in silence for a little while and then started yelling out loud. She said her friends got anything they wanted but she didn’t. Then she felt sorry for herself and asked why she was born into a poor family. Not having money has caused this girl to think negatively about herself and her family. It has caused a lot of stress in her life."
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -43,6 +42,7 @@ Window {
         SpritzSDK.clientSecret: SpritzKeys.clientSecret
 
         onInitialized: { spritzText(window.spritzText); }
+        onProgressChanged: { console.log("progress", progress); }
 
         Rectangle {
             id: overlayRect;
@@ -61,13 +61,13 @@ Window {
         width: parent.width / 3
         color: 'green'
         opacity: 1
-        Component.onCompleted: shrinker.start();
     }
 
     SequentialAnimation {
-        id: shrinker
-        PropertyAnimation { target: spritzView; property: 'scale'; from: 1; to: 0; duration: 5000 }
-        PropertyAnimation { target: spritzView; property: 'scale'; from: 0; to: 1; duration: 5000 }
+        id: fader
+        PropertyAnimation { target: spritzView; property: 'opacity'; from: 1; to: 0; duration: 5000 }
+        PropertyAnimation { target: spritzView; property: 'opacity'; from: 0; to: 1; duration: 5000 }
         loops: Animation.Infinite
     }
+    Component.onCompleted: fader.start();
 }
