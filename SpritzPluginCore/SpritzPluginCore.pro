@@ -1,3 +1,12 @@
+# Include Environment-Specific Definitions File.
+# Must include the following variables:
+#   SPRITZ_HOME = xxx
+#
+# This file is not included in git. You need
+# to create it locally in $$PWD before you can build.
+PRE_TARGETDEPS += $$PWD/SpritzPluginBuildEnv.pri
+include($$PWD/SpritzPluginBuildEnv.pri)
+
 TEMPLATE = lib
 TARGET = SpritzPlugin
 QT += qml quick
@@ -8,8 +17,6 @@ QT += core-private gui-private
 
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = Qtino.Spritz
-
-sdk_version = 1.2
 
 ios { OS = iOS }
 macx { OS = OSX }
@@ -56,14 +63,14 @@ ios {
 
     QMAKE_MOC_OPTIONS += -Muri=$$uri
 
-    QMAKE_LFLAGS += -F/Users/bdentino/SpritzSDK/iOS/$$sdk_version \
+    QMAKE_LFLAGS += -F$${SPRITZ_HOME} \
                     -F/System/Library/Frameworks
 
     LIBS += -framework SpritzSDK -framework AudioToolbox -framework CoreData -framework UIKit
-    INCLUDEPATH += /Users/bdentino/SpritzSDK/iOS/$$sdk_version/SpritzSDK.framework/Headers/
+    INCLUDEPATH += $${SPRITZ_HOME}/SpritzSDK.framework/Headers/
 
     qmls.files += $$PWD/SpritzWidget.qml
-    spritzBundle.files += /Users/bdentino/SpritzSDK/iOS/$$sdk_version/SpritzSDK.bundle
+    spritzBundle.files += $${SPRITZ_HOME}/SpritzSDK.bundle
     QMAKE_BUNDLE_DATA += spritzBundle
 
     spritzImages.files += $$PWD/iOS/poweredbyspritz.png

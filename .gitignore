@@ -1,4 +1,8 @@
 Build/*
 build-*
-*.pro.user
+*-build-*
+*.user
+*.user.*
+*.autosave
 SpritzPluginTest/SpritzKeys.js
+SpritzPluginCore/SpritzPluginBuildEnv.pri
