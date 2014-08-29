@@ -1,6 +1,14 @@
 import QtQuick 2.2
 import QtQuick.Window 2.1
 import Qtino.Spritz 1.2
+
+# The file "SpritzKeys.js" doesn't exist in the repo. You need to create it and 
+# define the following variables using the values provided by the Spritz 
+# organization in order to enable their SDK in your application:
+# 
+#   //SpritzKeys.js
+#   var clientId = <your_client_id>
+#   var clientSecret = <your_client_secret>
 import "SpritzKeys.js" as SpritzKeys
 
 Window {
