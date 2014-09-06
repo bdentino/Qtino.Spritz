@@ -206,7 +206,7 @@ Rectangle {
         color: 'black'
         anchors.right: bottomBorder.right
         anchors.bottom: bottomBorder.top
-        font.family: "GE Inspira"
+        font.family: "Avenir Next"
         font.pointSize: 12
         opacity: 0.5
         text: sequencer.currentIndex
